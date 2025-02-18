@@ -1,0 +1,21 @@
+a) Desenhar o grafo de dependência de tarefas:
+    Imagem GrafoDependenciaTarefas.png enviada no diretório.
+
+b) Grau máximo de concorrência:
+    O grau máximo de concorrência é 2.
+
+c) Caminho crítico:
+    O tamanho do caminho crítico é 7.
+
+d) Tempo para executar todas as tarefas de forma sequencial:
+    Considerando que cada tarefa tenha um tempo de execução de 1un, 
+    o tempo para executar todas as tarefas de forma sequencial é 9un.
+
+e) Tempo para executar todas as tarefas de forma paralela:
+    Considerando que cada tarefa tenha um tempo de execução de 1un, 
+    o tempo para executar todas as tarefas de forma paralela é 7un.
+
+f) Speedup máximo possível:
+    Speedup_max = Tempo_Seq / Tempo_Paral
+    Speedup_max = 9 / 7
+    Speedup_max = 1,286.
