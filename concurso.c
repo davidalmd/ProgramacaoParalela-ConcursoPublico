@@ -53,18 +53,26 @@ int main(int argc, char *argv[]) {
     MPI_Bcast(pontuacoes, NUM_QUESTOES, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
     // Distribuir candidatos
-    int count_aux = total_candidatos / size;
-    if (rank < total_candidatos % size) {
-        count_aux++;
+    int *sendcounts = malloc(size * sizeof(int));
+    int *displs = malloc(size * sizeof(int));
+
+    int deslocamento = 0;
+    for (int i = 0; i < size; i++) {
+        sendcounts[i] = (total_candidatos / size) * sizeof(Candidato);
+        if (i < total_candidatos % size) {
+            sendcounts[i] += sizeof(Candidato);  // Distribui os "restantes"
+        }
+        displs[i] = deslocamento;
+        deslocamento += sendcounts[i];
     }
 
-    Candidato *meus_candidatos = malloc(count_aux * sizeof(Candidato));
-    MPI_Scatter(candidatos, count_aux * sizeof(Candidato), MPI_BYTE,
-                meus_candidatos, count_aux * sizeof(Candidato), MPI_BYTE,
+    Candidato *meus_candidatos = malloc(sendcounts[rank]);
+    MPI_Scatterv(candidatos, sendcounts, displs, MPI_BYTE,
+                meus_candidatos, sendcounts[rank], MPI_BYTE,
                 0, MPI_COMM_WORLD);
 
     // Calcular notas finais
-    for (int i = 0; i < count_aux; i++) {
+    for (int i = 0; i < sendcounts[rank] / sizeof(Candidato); i++) {
         meus_candidatos[i].media_final = retornar_nota_final(meus_candidatos[i].respostas, gabarito, pontuacoes);
     }
 
@@ -74,8 +82,8 @@ int main(int argc, char *argv[]) {
         candidatos_final = malloc(total_candidatos * sizeof(Candidato));
     }
 
-    MPI_Gather(meus_candidatos, count_aux * sizeof(Candidato), MPI_BYTE,
-               candidatos_final, count_aux * sizeof(Candidato), MPI_BYTE,
+    MPI_Gatherv(meus_candidatos, sendcounts[rank], MPI_BYTE,
+               candidatos_final, sendcounts, displs, MPI_BYTE,
                0, MPI_COMM_WORLD);
 
     if (rank == 0) {
